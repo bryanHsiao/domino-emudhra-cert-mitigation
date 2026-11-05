@@ -1,5 +1,7 @@
 # Domino / Notes eMudhra 憑證事件清理 (CVE-2026-91403)
 
+**繁體中文** · [English](README.en.md)
+
 針對 **eMudhra / emSign CA 中繼私鑰外洩**（CVE-2026-91403，CVSS 9.1）在 HCL Domino / Notes 環境中的**清查與移除**做法。
 
 重點：**不需要任何大型 GUI 程式**。清查只要 Domino 內建的 `keytool` 一行指令，移除也只是幾個 `keytool -delete` 加上文字編輯 `cacert.pem`。本 repo 把這套最小化、可重現、可回退的流程整理成 SOP 與一支唯讀檢查腳本。
@@ -16,15 +18,25 @@
   - HCL KB：**KB0134844**〈What steps are required to protect HCL Notes and Domino from the eMudhra Certificate Compromise issue?〉（內含相關 Security Bulletin）
   - CVE：**CVE-2026-91403**
 
-## 牽涉的三個憑證庫
+## 官方依據與適用版本
+
+HCL 官方 KB **KB0134844** 為權威依據，內含 4 份 Security Bulletin：**KB0134742 / KB0134847 / KB0134848 / KB0134849**。官方「Applies to」= **12.0.2 Fixpack 8 及更早、14.0 Fixpack 5 及更早、14.5.1 Fixpack 1 及更早**；在官方正式修正版釋出前，以下為手動緩解步驟。
+
+> 9.0.1 **不在**官方 KB 的 Applies-to 清單內；且實測 9.0.1 內建 JVM 的 `cacerts` 多半**沒有** emSign。要處理 9.0.1 請先唯讀清查確認有無標的（見 [SOP.md](SOP.md) 第〇節），不要照抄別人的假設。
+
+## 牽涉的四個憑證庫
+
+KB0134844 明列要從**四個**庫移除 emSign 與 Comodo CA Limited 憑證：
 
 | 庫 | 位置 | 處理 |
 |---|---|---|
-| **`cacert.pem`** | Domino server 與 **Notes client 各一份** | 移除受影響的 emSign CA 區塊（HCL 文件列 3 張；部分 vendor 建議連 `emSign Root CA - G1` 共 4 張） |
-| **Java `cacerts`** | Domino / Notes 內建 JVM 的 `jvm/lib/security/cacerts` | 依版本可能含 emSign 或 `AAA Certificate Services`（Comodo/Sectigo 老 root）；是否移除 AAA 請依你的對接回歸評估 |
-| **`names.nsf` / `certstore.nsf`** | Domino 目錄資料庫 | **只有在你曾手動把這些 CA 加成 Internet cross-certificate 時才需處理**；原廠樣板不出貨這些 root |
+| **Java `cacerts`** | 內建 JVM `jvm/lib/security/cacerts`（server 與 client 各一份） | 移除 emSign（官方 keytool 範例針對 **emSign ECC Root CA - G3**；請先 `-list` 確認實際別名） |
+| **`cacert.pem`** | Data 目錄（libcurl 用於 LotusScript / OIDC 等） | 刪除 **3 張 emSign**：`emSign ECC Root CA - G3`、`emSign Root CA - C1`、`emSign ECC Root CA - C3`；**舊版另刪 Comodo AAA** |
+| **`names.nsf`**（Domino Directory） | Security → Certificates view | **Comodo AAA 為原廠預載，需移除**；刪除後 replicate NAB、逐台重啟。另若曾手動加入其他受影響 CA（含 `certstore.nsf`）一併移除 |
+| **`cert8.db`**（Notes client） | `…\Data\workspace\BrowserProfile\` | 備份後，以 KB0134844 提供的乾淨 `cert8.db` 置換（移除 Comodo AAA） |
 
-> 版本差異很大：舊版（如 9.0.1）內建 JVM 的 `cacerts` 多半**沒有** emSign、但**有** AAA；新版則不同。**不要照抄別人的假設，實測你自己這台**（見 SOP 第〇節）。
+> ⚠️ HCL 官方 cacert.pem 的 3 張**不含** `emSign Root CA - G1`；部分第三方建議連 G1 一起移（共 4 張）屬自行加嚴，請依你的對接回歸評估決定。
+> 平台例外：**iSeries** 用獨立 `cacert.kdb`、不受 libcurl 影響（其 IBM JVM 請洽 IBM）；**Notes on Mac** 走系統 keychain（請裝最新 macOS 更新）。
 
 ## 最小化做法（為什麼不需要大程式）
 
