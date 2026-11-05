@@ -6,7 +6,7 @@ Guidance for **auditing and removing** the compromised eMudhra / emSign CA certi
 
 Auditing needs only a one-line `keytool` command that already ships inside every Domino install; removal is a handful of `keytool -delete` calls, a text edit of `cacert.pem`, a Domino Directory edit, and a `cert8.db` file swap. This repo wraps the official steps with read-only auditing, manual backups, and regression testing.
 
-> ⚠️ This is an operational guide; removal steps follow HCL's official **KB0134844**. For production, follow the official KB and validate on a test machine first.
+> ⚠️ This guide is compiled from HCL's public KB [KB0134844](https://support.hcl-software.com/csm?id=kb_article&sys_kb_id=493d196a3b14d31428f8f547f4e45a7c) (the eMudhra certificate incident), but is **not itself an official document** — it is a secondary compilation, adds steps the KB doesn't cover (read-only audit, backup, regression testing), and HCL may update the KB. For production, always defer to the **latest official KB** and validate on a test machine first.
 
 ---
 

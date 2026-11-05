@@ -6,7 +6,7 @@
 
 清查只要 Domino 內建的 `keytool`，移除也只是幾個 `keytool -delete` 加上文字編輯 `cacert.pem`、Domino Directory 編輯與 `cert8.db` 置換。本 repo 把這套可重現、可回退的流程整理成 SOP 與一支唯讀檢查腳本。
 
-> ⚠️ 本文件是整理自公開 advisory 的操作指引，非官方文件。正式環境請以 HCL 官方 KB 為準，並務必先在測試機驗證。
+> ⚠️ 本文件整理自 HCL 公開 KB [KB0134844](https://support.hcl-software.com/csm?id=kb_article&sys_kb_id=493d196a3b14d31428f8f547f4e45a7c)（eMudhra 憑證事件）。但本文**仍非官方文件**——它是二次整理，另含官方 KB 未涵蓋的步驟（唯讀清查、備份、回歸測試），且 HCL 可能更新該 KB。正式環境一律以**官方 KB 最新版**為準，並務必先在測試機驗證。
 
 ---
 
