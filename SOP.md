@@ -6,11 +6,11 @@
 >
 > 指令以 **Windows PowerShell 5.1** 為例（串接用 `;`，不要用 `&&`）。Linux / AIX / Mac 把 `Select-String` 換成 `grep -iE`、`\` 換成 `/`。
 >
-> 適用版本（官方 Applies to）：**12.0.2 FP8 及更早、14.0 FP5 及更早、14.5.1 FP1 及更早**。9.0.1 不在官方清單內，若要處理請先用第〇節唯讀確認有無標的。
+> 適用版本（官方 Applies to）：**12.0.2 FP8 及更早、14.0 FP5 及更早、14.5.1 FP1 及更早**。9.0.1 不在官方清單內，若要處理請先用步驟 0 唯讀確認有無標的。
 
 ---
 
-## 〇、唯讀偵察（先做；完全不修改，零風險）
+## 步驟 0、唯讀偵察（先做；完全不修改，零風險）
 
 目的：在不動任何檔案的前提下，確認「這台到底有沒有這些憑證」「在哪個庫」「移掉的回歸面多大」。**範圍刻意只掃 Domino / Notes 目錄，不掃整機**，避免波及不相干軟體。
 
@@ -48,7 +48,7 @@ Select-String -Path "D:\HCL\Domino\Data\cacert.pem" -Pattern "emSign","eMudhra",
 
 ---
 
-## 一、前置準備
+## 步驟 1、前置準備
 
 1. **確認版本一致**：測試機的 Domino / JDK / OS 與 production 對齊。
 2. **全量手動備份**（官方只對 cert8.db 要求備份，其餘務必自行備份）：
@@ -65,11 +65,11 @@ Select-String -Path "D:\HCL\Domino\Data\cacert.pem" -Pattern "emSign","eMudhra",
 
 ---
 
-## 二、移除（依 KB0134844）
+## 步驟 2、移除（依 KB0134844）
 
 ### A. Java `cacerts`（keytool）
 
-先 `cd` 到 **Notes/Domino 程式目錄** 下的 `jvm\lib\security`，再依版本執行。官方 keytool 範例針對 **emSign ECC Root CA - G3**；先用第〇節 `-list` 確認你這台實際有哪些 emSign 別名。
+先 `cd` 到 **Notes/Domino 程式目錄** 下的 `jvm\lib\security`，再依版本執行。官方 keytool 範例針對 **emSign ECC Root CA - G3**；先用步驟 0 的 `-list` 確認你這台實際有哪些 emSign 別名。
 
 **12.0.2 Fixpacks（Java 8）**
 
@@ -149,7 +149,7 @@ Notes client 的瀏覽器 profile 用 `cert8.db`。官方做法是**用 HCL 提�
 
 ---
 
-## 三、回歸測試（做完移除後，最重要；官方未涵蓋）
+## 步驟 3、回歸測試（做完移除後，最重要；官方未涵蓋）
 
 1. **重現原本會報的操作 / 掃描** → 應不再報。
 2. **既有正常流程不可壞**：
@@ -164,10 +164,10 @@ Notes client 的瀏覽器 profile 用 `cert8.db`。官方做法是**用 HCL 提�
 
 ---
 
-## 四、Rollback（任何一步出問題就回退）
+## 步驟 4、Rollback（任何一步出問題就回退）
 
 - **`cacert.pem`**：把備份整份複製回去。
 - **Java `cacerts`**：把備份整份複製回去（直接換回整個 keystore 最乾淨）。
 - **`names.nsf`**：還原備份複本，重新 replicate。
 - **`cert8.db`**：把備份複製回原位。
-- 回退後重跑第三節回歸測試，確認回到原狀態。
+- 回退後重跑步驟 3 回歸測試，確認回到原狀態。
