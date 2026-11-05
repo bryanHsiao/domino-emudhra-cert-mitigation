@@ -1,0 +1,11 @@
+# 不要把任何憑證庫、備份、log、敏感資料放進 repo
+*.pem
+*.jks
+*.p12
+*.pfx
+cacerts
+*.bak
+*.log
+*.csv
+before-after/
+search/
