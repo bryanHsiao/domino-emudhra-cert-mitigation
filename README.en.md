@@ -4,7 +4,7 @@
 
 Guidance for **auditing and removing** the compromised eMudhra / emSign CA certificates (CVE-2026-91403, CVSS 9.1) from HCL Domino / Notes environments.
 
-Key point: **no large GUI tool is required.** Auditing needs only a one-line `keytool` command that already ships inside every Domino install; removal is a handful of `keytool -delete` calls, a text edit of `cacert.pem`, a Domino Directory edit, and a `cert8.db` file swap. This repo wraps the official steps with read-only auditing, manual backups, and regression testing.
+Auditing needs only a one-line `keytool` command that already ships inside every Domino install; removal is a handful of `keytool -delete` calls, a text edit of `cacert.pem`, a Domino Directory edit, and a `cert8.db` file swap. This repo wraps the official steps with read-only auditing, manual backups, and regression testing.
 
 > ⚠️ This is an operational guide; removal steps follow HCL's official **KB0134844**. For production, follow the official KB and validate on a test machine first.
 
@@ -36,13 +36,13 @@ KB0134844 removes emSign and Comodo CA Limited certificates from **four** stores
 > ⚠️ HCL's three `cacert.pem` certs do **not** include `emSign Root CA - G1`; some third parties also remove G1 (4 total) as extra hardening — decide based on your connectivity regression.
 > Platform exceptions: **iSeries** uses a separate `cacert.kdb` and is not affected by libcurl (its IBM JVM — contact IBM); **Notes on Mac** relies on the system keychain (apply the latest macOS updates).
 
-## Why you don't need a big program
+## How it's done (all with built-in keytool)
 
-A "scan-every-drive, GUI, confirm-each-cert, write-logs" tool is ~99% bundled runtime; the actual logic is a few lines — and those lines are `keytool`, which is already built into every Domino. The `names.nsf` and `cert8.db` steps are plain Domino-admin / file operations either way.
+Both auditing and removal use only Domino's built-in `keytool` and a text editor — nothing extra to install. The `names.nsf` and `cert8.db` steps are plain Domino-admin / file operations.
 
 - **Audit**: `keytool -list -v ... | Select-String "emSign","emudhra","AAA"`, plus inspecting `cacert.pem`. That's what [`scripts/check-domino-certs.ps1`](scripts/check-domino-certs.ps1) does (read-only).
 - **Remove**: a few `keytool -delete -alias <alias> ...` calls, a manual text edit of `cacert.pem`, a Directory edit, and a `cert8.db` swap.
-- A big tool's only added value is the GUI, auto-discovery across the whole machine, and centralized logging — at the cost of a **large blast radius** (it also touches unrelated software's `cacerts`) and no transparency.
+- Audit read-only first and touch only the target files on each known server, so you don't disturb unrelated software's trust stores.
 
 Full steps in **[SOP.md](SOP.md)** (written in Traditional Chinese; commands are standard PowerShell / keytool and copy-paste directly).
 

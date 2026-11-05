@@ -4,7 +4,7 @@
 
 針對 **eMudhra / emSign CA 中繼私鑰外洩**（CVE-2026-91403，CVSS 9.1）在 HCL Domino / Notes 環境中的**清查與移除**做法。
 
-重點：**不需要任何大型 GUI 程式**。清查只要 Domino 內建的 `keytool` 一行指令，移除也只是幾個 `keytool -delete` 加上文字編輯 `cacert.pem`。本 repo 把這套最小化、可重現、可回退的流程整理成 SOP 與一支唯讀檢查腳本。
+清查只要 Domino 內建的 `keytool`，移除也只是幾個 `keytool -delete` 加上文字編輯 `cacert.pem`、Domino Directory 編輯與 `cert8.db` 置換。本 repo 把這套可重現、可回退的流程整理成 SOP 與一支唯讀檢查腳本。
 
 > ⚠️ 本文件是整理自公開 advisory 的操作指引，非官方文件。正式環境請以 HCL 官方 KB 為準，並務必先在測試機驗證。
 
@@ -38,13 +38,13 @@ KB0134844 明列要從**四個**庫移除 emSign 與 Comodo CA Limited 憑證：
 > ⚠️ HCL 官方 cacert.pem 的 3 張**不含** `emSign Root CA - G1`；部分第三方建議連 G1 一起移（共 4 張）屬自行加嚴，請依你的對接回歸評估決定。
 > 平台例外：**iSeries** 用獨立 `cacert.kdb`、不受 libcurl 影響（其 IBM JVM 請洽 IBM）；**Notes on Mac** 走系統 keychain（請裝最新 macOS 更新）。
 
-## 最小化做法（為什麼不需要大程式）
+## 做法概覽（都用內建 keytool）
 
-一支「掃全機、GUI、逐張確認、寫 log」的大型工具，99% 的體積是打包進去的執行環境，真正做事的邏輯只有幾行——而那幾行 `keytool` 本來就內建在每一台 Domino 裡。
+清查與移除都只用 Domino 內建的 `keytool` 與文字編輯，不需要額外安裝工具。
 
 - **清查**：`keytool -list -v ... | Select-String "emSign","emudhra","AAA"`，外加看 `cacert.pem`。這就是本 repo 的 [`scripts/check-domino-certs.ps1`](scripts/check-domino-certs.ps1)（純唯讀）。
-- **移除**：`keytool -delete -alias <別名> ...` 幾行 + 手動編輯 `cacert.pem` 文字區塊。
-- 大程式唯一多買到的是 GUI、自動掃全機、集中 log——代價是**波及面大**（會掃到 Python / git / Node 等不相干軟體的 `cacerts`）且不透明。對「已知的幾台伺服器」而言，手動反而更安全、更可控。
+- **移除**：`keytool -delete -alias <別名> ...` + 手動編輯 `cacert.pem` 文字區塊；`names.nsf` 走 Domino 管理端刪除、`cert8.db` 以官方乾淨檔置換。
+- 建議先唯讀清查確認有無標的，逐台只動目標檔，避免動到不相干軟體的憑證庫。
 
 詳細步驟見 **[SOP.md](SOP.md)**。
 
