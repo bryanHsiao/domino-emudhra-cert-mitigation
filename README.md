@@ -2,6 +2,8 @@
 
 **繁體中文** · [English](README.en.md)
 
+> 📖 **線上視覺導讀**（GitHub Pages）：<https://bryanhsiao.github.io/domino-emudhra-cert-mitigation/>
+
 針對 **eMudhra / emSign CA 中繼私鑰外洩**（CVE-2026-91403，CVSS 9.1）在 HCL Domino / Notes 環境中的**清查與移除**做法。
 
 清查只要 Domino 內建的 `keytool`，移除也只是幾個 `keytool -delete` 加上文字編輯 `cacert.pem`、Domino Directory 編輯與 `cert8.db` 置換。本 repo 把這套可重現、可回退的流程整理成 SOP 與一支唯讀檢查腳本。

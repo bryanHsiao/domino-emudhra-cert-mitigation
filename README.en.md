@@ -2,6 +2,8 @@
 
 [繁體中文](README.md) · **English**
 
+> 📖 **Online visual guide** (GitHub Pages): <https://bryanhsiao.github.io/domino-emudhra-cert-mitigation/>
+
 Guidance for **auditing and removing** the compromised eMudhra / emSign CA certificates (CVE-2026-91403, CVSS 9.1) from HCL Domino / Notes environments.
 
 Auditing needs only a one-line `keytool` command that already ships inside every Domino install; removal is a handful of `keytool -delete` calls, a text edit of `cacert.pem`, a Domino Directory edit, and a `cert8.db` file swap. This repo wraps the official steps with read-only auditing, manual backups, and regression testing.
