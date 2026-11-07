@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en" data-theme="paper" data-mode="auto" data-style="80">
+<html lang="zh-Hant" data-theme="paper" data-mode="auto" data-style="80">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-COhqkbaPOF+O1MeXzrrqyxS5JHiLZTzpFZpBTV1Hy4A=' 'sha256-lPqFPx9oza8AmRj6iqQLqEVdDcwxhxzQ3yQnVhy8ZDM='; style-src 'unsafe-inline'; img-src data:; font-src data:; media-src data:; connect-src 'self'; form-action 'none'; base-uri 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="generator" content="Answer me with HTML 0.5.11">
-<title>HCL Notes/Domino — eMudhra 憑證入侵風險修補</title>
+<title>eMudhra 憑證入侵事件 — 這個弱點是怎麼產生的</title>
 <style>
 html[data-theme="blueprint"], html[data-theme="blueprint"][data-mode="light"] {
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -910,185 +910,117 @@ html[data-theme="paper"] .am-md table { font-family: var(--font-sans); }
 </style>
 </head>
 <body>
-<div class="am-toolbar" data-am-root-lang="en" data-am-root-theme="paper" data-am-root-mode="auto" data-am-root-style="80">
-<label class="am-pick">Theme<select data-am="theme"><option value="blueprint">Blueprint</option><option value="shadcn">Cards</option><option value="paper" selected>Paper</option></select></label>
-<label class="am-pick">Mode<select data-am="mode"><option value="auto" selected>Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
-<button class="am-btn" type="button" data-am="scale-down" data-min="0.8" data-max="1.5" data-step="0.05" aria-label="Smaller text" title="Smaller text" hidden>A−</button><button class="am-btn" type="button" data-am="scale-up" data-min="0.8" data-max="1.5" data-step="0.05" aria-label="Larger text" title="Larger text" hidden>A+</button>
-<button class="am-btn am-btn--reply" type="button" data-am="reply" data-ui="{&quot;button&quot;:&quot;Reply&quot;,&quot;comment&quot;:&quot;Comment&quot;,&quot;commentHint&quot;:&quot;Your comment on this panel&quot;,&quot;title&quot;:&quot;Your reply&quot;,&quot;hint&quot;:&quot;Copy it and paste it into your chat with the agent; it continues from your choices and comments.&quot;,&quot;copy&quot;:&quot;Copy reply&quot;,&quot;copyFailed&quot;:&quot;Copy failed — press Cmd/Ctrl+C&quot;,&quot;close&quot;:&quot;Close&quot;,&quot;suggested&quot;:&quot;suggested&quot;,&quot;empty&quot;:&quot;Pick options, or comment on a panel first.&quot;,&quot;decisions&quot;:&quot;Decisions&quot;,&quot;comments&quot;:&quot;Comments&quot;,&quot;confirmed&quot;:&quot;suggestion confirmed&quot;,&quot;untouched&quot;:&quot;not answered; suggested&quot;,&quot;was&quot;:&quot;was&quot;,&quot;typed&quot;:&quot;Lines that start with \&quot;&gt;\&quot; are text the reader typed.&quot;,&quot;raw&quot;:&quot;Show the text that gets copied&quot;,&quot;preview&quot;:&quot;Preview&quot;,&quot;count&quot;:{&quot;answered&quot;:&quot;Answered: {n}&quot;,&quot;comments&quot;:&quot;Comments: {n}&quot;,&quot;remarks&quot;:&quot;Remarks: {n}&quot;},&quot;done&quot;:&quot;Copied ✓&quot;,&quot;remarks&quot;:&quot;Remarks&quot;,&quot;kinds&quot;:{&quot;suggestion&quot;:&quot;suggestion&quot;,&quot;keep&quot;:&quot;keep&quot;,&quot;question&quot;:&quot;question&quot;,&quot;concern&quot;:&quot;concern&quot;}}">Reply</button>
-<button class="am-btn am-btn--remark" type="button" data-am="remark" data-ui="{&quot;button&quot;:&quot;Remark&quot;,&quot;need&quot;:&quot;Pick a tag to save&quot;,&quot;hint&quot;:&quot;Optional note&quot;,&quot;save&quot;:&quot;Save&quot;,&quot;remove&quot;:&quot;Remove&quot;,&quot;clear&quot;:&quot;Clear all remarks&quot;,&quot;clearConfirm&quot;:&quot;Click again to clear {n}&quot;,&quot;section&quot;:&quot;Remarks&quot;,&quot;kinds&quot;:{&quot;suggestion&quot;:&quot;suggestion&quot;,&quot;keep&quot;:&quot;keep&quot;,&quot;question&quot;:&quot;question&quot;,&quot;concern&quot;:&quot;concern&quot;}}">Remark</button>
-<button class="am-btn" type="button" data-am="copy" data-done="Copied ✓">Copy source</button>
+<div class="am-toolbar" data-am-root-lang="zh-Hant" data-am-root-theme="paper" data-am-root-mode="auto" data-am-root-style="80">
+<label class="am-pick">主題<select data-am="theme"><option value="blueprint">圖紙</option><option value="shadcn">卡片</option><option value="paper" selected>紙張</option></select></label>
+<label class="am-pick">明暗<select data-am="mode"><option value="auto" selected>跟隨系統</option><option value="light">淺色</option><option value="dark">深色</option></select></label>
+<button class="am-btn" type="button" data-am="scale-down" data-min="0.8" data-max="1.5" data-step="0.05" aria-label="縮小文字" title="縮小文字" hidden>A−</button><button class="am-btn" type="button" data-am="scale-up" data-min="0.8" data-max="1.5" data-step="0.05" aria-label="放大文字" title="放大文字" hidden>A+</button>
+<button class="am-btn am-btn--reply" type="button" data-am="reply" data-ui="{&quot;button&quot;:&quot;回覆&quot;,&quot;comment&quot;:&quot;評論&quot;,&quot;commentHint&quot;:&quot;對這個面板的意見&quot;,&quot;title&quot;:&quot;你的回覆&quot;,&quot;hint&quot;:&quot;複製後貼回和 Agent 的對話，它會按你的選擇和意見繼續。&quot;,&quot;copy&quot;:&quot;複製回覆&quot;,&quot;copyFailed&quot;:&quot;複製失敗 — 請按 Cmd/Ctrl+C&quot;,&quot;close&quot;:&quot;關閉&quot;,&quot;suggested&quot;:&quot;建議&quot;,&quot;empty&quot;:&quot;先選擇選項，或在面板上寫評論。&quot;,&quot;decisions&quot;:&quot;決定&quot;,&quot;comments&quot;:&quot;評論&quot;,&quot;confirmed&quot;:&quot;確認了建議&quot;,&quot;untouched&quot;:&quot;未作答，建議&quot;,&quot;was&quot;:&quot;原為&quot;,&quot;typed&quot;:&quot;以 \&quot;&gt;\&quot; 開頭的行是讀者輸入的文字。&quot;,&quot;raw&quot;:&quot;查看將複製的文字&quot;,&quot;preview&quot;:&quot;預覽&quot;,&quot;count&quot;:{&quot;answered&quot;:&quot;已作答 {n} 項&quot;,&quot;comments&quot;:&quot;評論 {n} 則&quot;,&quot;remarks&quot;:&quot;標註 {n} 處&quot;},&quot;done&quot;:&quot;已複製 ✓&quot;,&quot;remarks&quot;:&quot;標註&quot;,&quot;kinds&quot;:{&quot;suggestion&quot;:&quot;建議&quot;,&quot;keep&quot;:&quot;保留&quot;,&quot;question&quot;:&quot;疑問&quot;,&quot;concern&quot;:&quot;關注&quot;}}">回覆</button>
+<button class="am-btn am-btn--remark" type="button" data-am="remark" data-ui="{&quot;button&quot;:&quot;標註&quot;,&quot;need&quot;:&quot;選擇標籤後才能儲存&quot;,&quot;hint&quot;:&quot;批註（可選）&quot;,&quot;save&quot;:&quot;儲存&quot;,&quot;remove&quot;:&quot;刪除&quot;,&quot;clear&quot;:&quot;清除所有標註&quot;,&quot;clearConfirm&quot;:&quot;再次點擊以清除 {n} 處標註&quot;,&quot;section&quot;:&quot;標註&quot;,&quot;kinds&quot;:{&quot;suggestion&quot;:&quot;建議&quot;,&quot;keep&quot;:&quot;保留&quot;,&quot;question&quot;:&quot;疑問&quot;,&quot;concern&quot;:&quot;關注&quot;}}">標註</button>
+<button class="am-btn" type="button" data-am="copy" data-done="已複製 ✓">複製源稿</button>
 </div>
 <main class="am-doc">
-<header class="am-head"><p class="am-colophon">Generated by <a href="https://github.com/doggy8088/answer-me-with-html" target="_blank" rel="noopener">Answer me with HTML</a> 0.5.11 · 2026-11-07 15:24 · <a href="https://github.com/doggy8088/answer-me-with-html" target="_blank" rel="noopener">★ Star on GitHub</a></p><h1>HCL Notes/Domino — eMudhra 憑證入侵風險修補</h1><p class="am-sub">KB0134844 · 把 4 個憑證庫裡的被信任憑證移除</p><div class="am-head-meta"><span><b>source</b>HCL KB0134844</span><span><b>updated</b>2026-11-04（KB 更新於 3 天前）</span></div><div class="am-intro am-md"><div class="am-md"><p>Lead：eMudhra 中介 CA 被入侵，影響 Notes/Domino 內建的 Java 與 libcurl 根憑證庫。官方修補尚未釋出，先照下面 4 步驟手動從 4 個憑證庫刪除 <strong>emSign</strong> 與 <strong>Comodo AAA</strong> 憑證，就能擋掉風險。整個流程<strong>不需要裝修正包</strong>，只是改既有檔案。</p>
-<div class="am-callout am-callout--warn"><div class="am-callout-title">⚠️ 非官方整理，以官方 KB 最新版為準</div><p style="margin:0">本頁整理自 HCL 公開 <a href="https://support.hcl-software.com/csm?id=kb_article&amp;sys_kb_id=493d196a3b14d31428f8f547f4e45a7c">KB0134844</a>，<strong>非官方文件</strong>；HCL 可能更新該 KB，正式環境一律以<strong>官方 KB 最新版</strong>為準，並務必先在測試機驗證。完整的唯讀清查／備份／回歸測試／回退步驟，見專案 <a href="https://github.com/bryanHsiao/domino-emudhra-cert-mitigation">GitHub repo 的 SOP</a>。</p></div>
+<header class="am-head"><p class="am-colophon">Generated by <a href="https://github.com/doggy8088/answer-me-with-html" target="_blank" rel="noopener">Answer me with HTML</a> 0.5.11 · 2026-11-07 15:53 · <a href="https://github.com/doggy8088/answer-me-with-html" target="_blank" rel="noopener">★ Star on GitHub</a></p><h1>eMudhra 憑證入侵事件 — 這個弱點是怎麼產生的</h1><p class="am-sub">2026 年 10 月 · 8 把 intermediate CA 私鑰弱到可被還原</p><p class="am-sub" style="margin-top:6px">兩頁導覽：① <strong>事件原因（本頁）</strong> → ② <a href="how-to.html">該怎麼做：修補步驟</a></p><div class="am-head-meta"><span><b>source</b>Keytos / Mozilla NSS / The Hacker News / Red Hat RHSB-2026-012</span></div><div class="am-intro am-md"><div class="am-md"><p>Lead：<strong>一把 intermediate CA 的私鑰就是數字 4</strong>。不是 eMudhra 被駭。是 2025 年 4 月他們產出的 8 把 intermediate CA 金鑰強度太弱。公鑰公開在 CCADB，任何人抓到都能反推私鑰。拿到私鑰就能偽造任何 HTTPS 憑證。Notes/Domino 中招是因為它<strong>自帶</strong> CA 信任庫、不吃 OS 更新。</p><div class="am-callout am-callout--warn"><div class="am-callout-title">⚠️ 非官方整理，部分細節為單一來源</div><p style="margin:0">本頁整理自公開資安報導與 HCL 公開 <a href="https://support.hcl-software.com/csm?id=kb_article&amp;sys_kb_id=493d196a3b14d31428f8f547f4e45a7c">KB0134844</a>，<strong>非官方文件</strong>；時間軸與「數字 4」等個別細節為單一來源、未經獨立證實（內文已標註）。修補一律以<strong>官方 KB 最新版</strong>為準，詳見 <a href="https://github.com/bryanHsiao/domino-emudhra-cert-mitigation">專案 repo</a>。</p></div>
 </div></div></header>
 <div class="am-doc-layout am-doc-layout--rail-start">
-<nav class="am-toc" aria-label="Contents" data-side="start" data-flow="in"><details class="am-outline"><summary aria-label="Contents"><span class="am-ticks" aria-hidden="true"><i class="am-tick" data-id="A" data-title="A · 影響範圍"></i><i class="am-tick" data-id="B" data-title="B · 要修哪 4 個位置"></i><i class="am-tick" data-id="C" data-title="C · 要刪的憑證清單"></i><i class="am-tick" data-id="D" data-title="D · 步驟 1：Java keystore（所有版本都要跑）"></i><i class="am-tick" data-id="E" data-title="E · 步驟 2：cacert.pem（libcurl 用）"></i><i class="am-tick" data-id="F" data-title="F · 步驟 3：Domino Directory（names.nsf）"></i><i class="am-tick" data-id="G" data-title="G · 步驟 4：Notes Client cert8.db"></i><i class="am-tick" data-id="H" data-title="H · 完成後：擴散與驗證"></i><i class="am-tick" data-id="I" data-title="I · 相關 KB（KB0134844 參照）"></i></span></summary><ol class="am-outline-list"><li><a href="#panel-A">A · 影響範圍</a></li><li><a href="#panel-B">B · 要修哪 4 個位置</a></li><li><a href="#panel-C">C · 要刪的憑證清單</a></li><li><a href="#panel-D">D · 步驟 1：Java keystore（所有版本都要跑）</a></li><li><a href="#panel-E">E · 步驟 2：cacert.pem（libcurl 用）</a></li><li><a href="#panel-F">F · 步驟 3：Domino Directory（names.nsf）</a></li><li><a href="#panel-G">G · 步驟 4：Notes Client cert8.db</a></li><li><a href="#panel-H">H · 完成後：擴散與驗證</a></li><li><a href="#panel-I">I · 相關 KB（KB0134844 參照）</a></li></ol></details></nav>
+<nav class="am-toc" aria-label="目錄" data-side="start" data-flow="in"><details class="am-outline"><summary aria-label="目錄"><span class="am-ticks" aria-hidden="true"><i class="am-tick" data-id="A" data-title="A · 一句話重述"></i><i class="am-tick" data-id="B" data-title="B · CA 信任鏈怎麼運作"></i><i class="am-tick" data-id="C" data-title="C · 時間軸（實際發生順序）"></i><i class="am-tick" data-id="D" data-title="D · 「可枚舉的弱 key」是什麼意思"></i><i class="am-tick" data-id="E" data-title="E · 拿到私鑰的攻擊者能幹嘛"></i><i class="am-tick" data-id="F" data-title="F · 為什麼 Notes/Domino 首當其衝"></i><i class="am-tick" data-id="G" data-title="G · 為什麼不能「等 HCL 發修正包」"></i><i class="am-tick" data-id="H" data-title="H · 總結：修補路徑看另一頁"></i><i class="am-tick" data-id="I" data-title="I · 參考來源"></i></span></summary><ol class="am-outline-list"><li><a href="#panel-A">A · 一句話重述</a></li><li><a href="#panel-B">B · CA 信任鏈怎麼運作</a></li><li><a href="#panel-C">C · 時間軸（實際發生順序）</a></li><li><a href="#panel-D">D · 「可枚舉的弱 key」是什麼意思</a></li><li><a href="#panel-E">E · 拿到私鑰的攻擊者能幹嘛</a></li><li><a href="#panel-F">F · 為什麼 Notes/Domino 首當其衝</a></li><li><a href="#panel-G">G · 為什麼不能「等 HCL 發修正包」</a></li><li><a href="#panel-H">H · 總結：修補路徑看另一頁</a></li><li><a href="#panel-I">I · 參考來源</a></li></ol></details></nav>
 <div class="am-doc-body">
 <section class="am-panel am-span-wide" id="panel-A">
-<header class="am-panel-head"><span class="am-panel-id">A</span><h2>影響範圍</h2></header>
-<div class="am-panel-body"><div class="am-md"><div class="am-table-wrap"><table>
-<thead>
-<tr>
-<th>產品</th>
-<th>受影響版本</th>
-<th>不受影響</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>HCL Notes/Domino</td>
-<td>12.0.2 Fixpack 8 及更早、14.0 Fixpack 5 及更早、14.5.1 Fixpack 1 及更早</td>
-<td>之後的 Fixpack</td>
-</tr>
-<tr>
-<td>Domino on IBM iSeries</td>
-<td>僅 Java keystore 需要處理（請聯絡 IBM）</td>
-<td>libcurl 用獨立 <code>cacert.kdb</code>，無此憑證</td>
-</tr>
-<tr>
-<td>Notes on Mac（libcurl 部分）</td>
-<td>—</td>
-<td>用系統 keychain，升級 macOS 即可</td>
-</tr>
-</tbody></table></div>
+<header class="am-panel-head"><span class="am-panel-id">A</span><h2>一句話重述</h2></header>
+<div class="am-panel-body"><div class="am-callout am-callout--err" role="note"><div class="am-callout-title">「信任清單」裡八把金鑰破功</div><div class="am-callout-body am-md"><p>Certificate Authority（CA）是網路世界的印章商。eMudhra 2025 年 4 月做的八把印章刻得太粗糙，任何人都能仿製。印章刻好之後，被 Mozilla、Microsoft、Apple 等主流信任清單收錄 — 包含 Notes/Domino 自帶的信任清單。結果：有能力的攻擊者可以偽造任何 HTTPS 網站的身分。</p>
+</div></div></div>
+</section>
+<section class="am-panel" id="panel-B">
+<header class="am-panel-head"><span class="am-panel-id">B</span><h2>CA 信任鏈怎麼運作</h2></header>
+<div class="am-panel-body"><div class="am-md"><p>正常狀況下，瀏覽器或應用程式信任 Root CA，Root CA 簽發 Intermediate CA，Intermediate CA 簽發你網站的憑證。只要攻擊者拿到任何一層的私鑰，就能偽造這條鏈下面所有東西。</p>
+</div>
+<figure class="am-diagram am-flow"><svg viewBox="0 0 502 205" width="502" height="205" role="img" aria-label="流程圖：Root CA、Intermediate CA、你的網站 example.com、別人的網站 google.com、銀行網站 bank.com" xmlns="http://www.w3.org/2000/svg"><defs><marker id="am1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="am-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs><g></g><g><g data-step="0"><path class="am-edge" d="M103.1,102.5 L114.6,102.5 Q126.1,102.5 137.6,102.5 L149.1,102.5" marker-end="url(#am1-arrow)"/></g><g data-step="0"><path class="am-edge" d="M232.9,120 L265.1,146.8 Q297.4,173.5 309.3,173.5 L321.3,173.5" marker-end="url(#am1-arrow)"/></g><g data-step="1"><path class="am-edge" d="M274.4,102.5 L285.9,102.5 Q297.4,102.5 308.9,102.5 L320.4,102.5" marker-end="url(#am1-arrow)"/></g><g data-step="2"><path class="am-edge" d="M232.9,85 L265.1,58.3 Q297.4,31.5 315,31.5 L332.6,31.5" marker-end="url(#am1-arrow)"/></g></g><g><g class="am-node am-node--round" data-key="Root CA" data-step="0"><rect class="am-node-shape" x="14" y="85" width="89.1" height="35" rx="17.5"/><text x="58.6" y="102.5" text-anchor="middle" dominant-baseline="central" class="am-node-text">Root CA</text></g><g class="am-node am-node--rect" data-key="Intermediate CA" data-step="0"><rect class="am-node-shape" x="149.1" y="85" width="125.2" height="35" rx="3"/><text x="211.8" y="102.5" text-anchor="middle" dominant-baseline="central" class="am-node-text">Intermediate CA</text></g><g class="am-node am-node--rect" data-key="你的網站 example.com" data-step="0"><rect class="am-node-shape" x="321.3" y="156" width="165.5" height="35" rx="3"/><text x="404.1" y="173.5" text-anchor="middle" dominant-baseline="central" class="am-node-text">你的網站 example.com</text></g><g class="am-node am-node--rect" data-key="別人的網站 google.com" data-step="1"><rect class="am-node-shape" x="320.4" y="85" width="167.4" height="35" rx="3"/><text x="404.1" y="102.5" text-anchor="middle" dominant-baseline="central" class="am-node-text">別人的網站 google.com</text></g><g class="am-node am-node--rect" data-key="銀行網站 bank.com" data-step="2"><rect class="am-node-shape" x="332.6" y="14" width="142.9" height="35" rx="3"/><text x="404.1" y="31.5" text-anchor="middle" dominant-baseline="central" class="am-node-text">銀行網站 bank.com</text></g></g></svg></figure>
+<div class="am-md"><p>Intermediate CA 是重點目標 — 一把就能簽<strong>全世界任何網域</strong>的假憑證。</p>
 </div></div>
 </section>
-<section class="am-panel am-span-wide" id="panel-B">
-<header class="am-panel-head"><span class="am-panel-id">B</span><h2>要修哪 4 個位置</h2></header>
-<div class="am-panel-body"><div class="am-tree"><div class="am-tree-root am-tree-root--solo"><div class="am-tree-box am-tree-box--root" data-key="Notes/Domino 伺服器與 Client" data-step="0">Notes/Domino 伺服器與 Client</div></div><ul class="am-tree-list"><li data-key="1. Java keystore (`cacerts`)" data-step="1"><span class="am-tree-label">1. Java keystore (<code>cacerts</code>)</span><span class="am-tree-sub">jvm/lib/security/，所有平台都要</span></li><li data-key="2. cacert.pem" data-step="2"><span class="am-tree-label">2. cacert.pem</span><span class="am-tree-sub">位於 Data directory，libcurl 的信任根</span></li><li data-key="3. Domino Directory (`names.nsf`)" data-step="3"><span class="am-tree-label">3. Domino Directory (<code>names.nsf</code>)</span><span class="am-tree-sub">管理伺服器上，Security → Certificates</span></li><li data-key="4. Notes Client `cert8.db`" data-step="4"><span class="am-tree-label">4. Notes Client <code>cert8.db</code></span><span class="am-tree-sub">僅 Notes Client（Windows 與 Mac 各有路徑）</span></li></ul></div></div>
-</section>
-<section class="am-panel am-span-wide" id="panel-C">
-<header class="am-panel-head"><span class="am-panel-id">C</span><h2>要刪的憑證清單</h2></header>
-<div class="am-panel-body"><div class="am-md"><div class="am-table-wrap"><table>
-<thead>
-<tr>
-<th>#</th>
-<th>憑證名稱</th>
-<th>出現在哪些位置</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1</td>
-<td>emSign ECC Root CA — G3</td>
-<td>Java keystore、cacert.pem</td>
-</tr>
-<tr>
-<td>2</td>
-<td>emSign Root CA — C1</td>
-<td>cacert.pem</td>
-</tr>
-<tr>
-<td>3</td>
-<td>emSign ECC Root CA — C3</td>
-<td>cacert.pem</td>
-</tr>
-<tr>
-<td>4</td>
-<td>Comodo AAA Services root (CN=AAA Certificate Services)</td>
-<td>names.nsf、cacert.pem（僅舊版 Notes/Domino）、cert8.db</td>
-</tr>
-</tbody></table></div>
-</div></div>
+<section class="am-panel" id="panel-C">
+<header class="am-panel-head"><span class="am-panel-id">C</span><h2>時間軸（實際發生順序）</h2></header>
+<div class="am-panel-body"><ol class="am-timeline am-timeline--v"><li class="am-tl-item"><span class="am-tl-when">2025-04</span><span class="am-tl-dot"></span><span class="am-tl-title">瑕疵金鑰儀式</span><span class="am-tl-text">eMudhra 做了一次 key ceremony，產出 8 把 intermediate CA 金鑰。eMudhra 事後自己說這次儀式有瑕疵（未經第三方獨立證實）</span></li><li class="am-tl-item"><span class="am-tl-when">2026-10-17</span><span class="am-tl-dot"></span><span class="am-tl-title">*研究者發現</span><span class="am-tl-text">一位獨立研究者掃公開 CCADB（Common CA Database）語料庫，發現這 8 把金鑰的 public key 可以枚舉推回 private key</span></li><li class="am-tl-item"><span class="am-tl-when">2026-10-18</span><span class="am-tl-dot"></span><span class="am-tl-title">eMudhra 緊急撤銷</span><span class="am-tl-text">把 8 把 intermediate CA 全部標記為 key compromise 撤銷</span></li><li class="am-tl-item"><span class="am-tl-when">2026-10-20</span><span class="am-tl-dot"></span><span class="am-tl-title">Mozilla 移除</span><span class="am-tl-text">NSS（Firefox / 多數 Linux 用）移除 emSign ECC Root CA - G3</span></li><li class="am-tl-item"><span class="am-tl-when">2026-10-22</span><span class="am-tl-dot"></span><span class="am-tl-title">eMudhra 退場</span><span class="am-tl-text">eMudhra 董事會宣布自願退出全球 SSL/TLS 憑證業務（此條僅單一來源 tech-insider.org 報導）</span></li><li class="am-tl-item"><span class="am-tl-when">進行中</span><span class="am-tl-dot"></span><span class="am-tl-title">Vendor patching</span><span class="am-tl-text">Red Hat 更新 ca-certificates、Google 宣布 Chrome 153 起不再預設信任、HCL 等應用廠商發 KB 指示手動刪除</span></li></ol></div>
 </section>
 <section class="am-panel" id="panel-D">
-<header class="am-panel-head"><span class="am-panel-id">D</span><h2>步驟 1：Java keystore（所有版本都要跑）</h2></header>
-<div class="am-panel-body"><div class="am-md"><p>關閉 Notes/Domino 再執行指令。路徑從 <code>&lt;Notes/Domino Program directory&gt;/jvm/lib/security/</code> 開始。</p>
-<p><strong>Notes/Domino 12.0.2 Fixpacks（Java 8）</strong></p>
-</div>
-<figure class="am-codeblock"><figcaption class="am-code-head"><span class="am-code-title">Windows (12.0.2)</span><span class="am-code-lang">bash</span><button class="am-code-copy" type="button" data-am="copy-code" data-done="Copied ✓">Copy</button></figcaption><pre class="am-code"><code data-lang="bash"><span class="am-ln">cd &lt;Program directory&gt;\jvm\lib\security</span><span class="am-ln">..\..\bin\keytool.exe -delete -alias &quot;cn=emsign_ecc_root_ca_-_g3,o=emudhra_technologies_limited,ou=emsign_pki,c=in&quot; -keystore cacerts -storepass changeit</span></code></pre></figure>
-<figure class="am-codeblock"><figcaption class="am-code-head"><span class="am-code-title">Linux/AIX/Mac (12.0.2)</span><span class="am-code-lang">bash</span><button class="am-code-copy" type="button" data-am="copy-code" data-done="Copied ✓">Copy</button></figcaption><pre class="am-code"><code data-lang="bash"><span class="am-ln">cd &lt;Program directory&gt;/jvm/lib/security</span><span class="am-ln">../../bin/keytool -delete -alias &quot;cn=emsign_ecc_root_ca_-_g3,o=emudhra_technologies_limited,ou=emsign_pki,c=in&quot; -keystore cacerts -storepass changeit</span></code></pre></figure>
-<div class="am-md"><p>較舊的 12.0.2 版本若上面格式錯，改用這個 alias：<code>&quot;c = in, ou = emsign pki, o = emudhra technologies limited, cn = emsign ecc root ca - g3&quot;</code></p>
-<p><strong>Notes/Domino 14.0 / 14.5.1 Fixpacks（Java 17 / Java 21）</strong></p>
-</div>
-<figure class="am-codeblock"><figcaption class="am-code-head"><span class="am-code-title">Windows (14.x)</span><span class="am-code-lang">bash</span><button class="am-code-copy" type="button" data-am="copy-code" data-done="Copied ✓">Copy</button></figcaption><pre class="am-code"><code data-lang="bash"><span class="am-ln">cd &lt;Program directory&gt;\jvm\lib\security</span><span class="am-ln">..\..\bin\keytool.exe -delete -alias &quot;cn_emsign_ecc_root_ca__g3,o_emudhra_technologies_limited,ou_emsign_pki,c_in [jdk]&quot; -cacerts</span></code></pre></figure>
-<figure class="am-codeblock"><figcaption class="am-code-head"><span class="am-code-title">Linux/AIX/Mac (14.x)</span><span class="am-code-lang">bash</span><button class="am-code-copy" type="button" data-am="copy-code" data-done="Copied ✓">Copy</button></figcaption><pre class="am-code"><code data-lang="bash"><span class="am-ln">cd &lt;Program directory&gt;/jvm/lib/security</span><span class="am-ln">../../bin/keytool -delete -alias &quot;cn_emsign_ecc_root_ca__g3,o_emudhra_technologies_limited,ou_emsign_pki,c_in [jdk]&quot; -cacerts</span></code></pre></figure>
-<div class="am-md"><blockquote>
-<p>IBM iSeries 用 IBM JVM，不是 Semeru。請找 IBM support 處理 JVM。</p>
+<header class="am-panel-head"><span class="am-panel-id">D</span><h2>「可枚舉的弱 key」是什麼意思</h2></header>
+<div class="am-panel-body"><div class="am-md"><p>RSA 金鑰的強度建立在「兩個大質數相乘容易、但反推極難」上。正常 RSA key 的私鑰是個 2048 或 4096 bit 的巨大整數。</p>
+<div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>正常 CA 私鑰</th>
+<th>eMudhra 這批弱 key</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2048 / 4096 bit 隨機大整數</td>
+<td>其中一把報導說就是「數字 4」</td>
+</tr>
+<tr>
+<td>用密碼學隨機源</td>
+<td>疑似沒跑真正的亂數產生流程</td>
+</tr>
+<tr>
+<td>數學上現在猜不出</td>
+<td>公鑰反推私鑰只要幾秒</td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p>⚠️ 來源：The Hacker News / tech-insider / Keytos 皆有報導「其中一把金鑰為數字 4」。eMudhra 官方聲明把責任歸給「key ceremony 流程瑕疵」。</p>
 </blockquote>
 </div></div>
 </section>
 <section class="am-panel" id="panel-E">
-<header class="am-panel-head"><span class="am-panel-id">E</span><h2>步驟 2：cacert.pem（libcurl 用）</h2></header>
-<div class="am-panel-body"><div class="am-md"><p>libcurl 被 LotusScript、OIDC、DominoIQ 等功能用。cacert.pem 在 Data directory。</p>
-<ol>
-<li>用編輯器打開 <code>&lt;Data directory&gt;/cacert.pem</code></li>
-<li>刪掉以下三段（emSign ECC G3、emSign C1、emSign ECC C3）的完整 <code>-----BEGIN CERTIFICATE-----</code> 到 <code>-----END CERTIFICATE-----</code> 段落</li>
-<li>若是舊版 Notes/Domino，再刪掉 Comodo AAA Services root 那段</li>
-<li>存檔後重啟 Notes/Domino</li>
-</ol>
-<blockquote>
-<p>Notes on Mac 不用動 cacert.pem（走系統 keychain），升級 macOS 即可。
-Domino on IBM iSeries 不用動 cacert.pem（走 <code>cacert.kdb</code>）。</p>
-</blockquote>
+<header class="am-panel-head"><span class="am-panel-id">E</span><h2>拿到私鑰的攻擊者能幹嘛</h2></header>
+<div class="am-panel-body"><figure class="am-diagram am-flow"><svg viewBox="0 0 725 168" width="725" height="168" role="img" aria-label="流程圖：攻擊者有私鑰、簽什麼?、TLS 憑證 x 6 把、偽造 HTTPS 身分 → MITM、程式碼簽章憑證 x 2 把、讓惡意程式通過系統簽章驗證" xmlns="http://www.w3.org/2000/svg"><defs><marker id="am2-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="am-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs><g></g><g><g data-step="0"><path class="am-edge" d="M132,84 L143.5,84 Q155,84 166.5,84 L178,84" marker-end="url(#am2-arrow)"/></g><g data-step="1"><path class="am-edge" d="M260.1,98.7 L286.3,113.4 Q312.4,128 332.6,128 L352.7,128" marker-end="url(#am2-arrow)"/></g><g data-step="1"><path class="am-edge" d="M476.4,128 L496.5,128 Q516.7,128 535.1,128 L553.6,128" marker-end="url(#am2-arrow)"/></g><g data-step="2"><path class="am-edge" d="M260.1,69.3 L286.3,54.6 Q312.4,40 323.9,40 L335.4,40" marker-end="url(#am2-arrow)"/></g><g data-step="2"><path class="am-edge" d="M493.7,40 L505.2,40 Q516.7,40 528.2,40 L539.7,40" marker-end="url(#am2-arrow)"/></g></g><g><g class="am-node am-node--round" data-key="攻擊者有私鑰" data-step="0"><rect class="am-node-shape" x="14" y="66.5" width="118" height="35" rx="17.5"/><text x="73" y="84" text-anchor="middle" dominant-baseline="central" class="am-node-text">攻擊者有私鑰</text></g><g class="am-node am-node--diamond" data-key="簽什麼?" data-step="0"><polygon class="am-node-shape" points="233.7,56 289.4,84 233.7,112 178,84"/><text x="233.7" y="84" text-anchor="middle" dominant-baseline="central" class="am-node-text">簽什麼?</text></g><g class="am-node am-node--rect" data-key="TLS 憑證 x 6 把" data-step="1"><rect class="am-node-shape" x="352.7" y="110.5" width="123.7" height="35" rx="3"/><text x="414.6" y="128" text-anchor="middle" dominant-baseline="central" class="am-node-text">TLS 憑證 x 6 把</text></g><g class="am-node am-node--rect" data-key="偽造 HTTPS 身分 → MITM" data-step="1"><rect class="am-node-shape" x="553.6" y="102" width="143.2" height="52" rx="3"/><text x="625.2" y="119.5" text-anchor="middle" dominant-baseline="central" class="am-node-text">偽造 HTTPS 身分 →</text><text x="625.2" y="136.5" text-anchor="middle" dominant-baseline="central" class="am-node-text">MITM</text></g><g class="am-node am-node--rect" data-key="程式碼簽章憑證 x 2 把" data-step="2"><rect class="am-node-shape" x="335.4" y="22.5" width="158.3" height="35" rx="3"/><text x="414.6" y="40" text-anchor="middle" dominant-baseline="central" class="am-node-text">程式碼簽章憑證 x 2 把</text></g><g class="am-node am-node--rect" data-key="讓惡意程式通過系統簽章驗證" data-step="2"><rect class="am-node-shape" x="539.7" y="14" width="171" height="52" rx="3"/><text x="625.2" y="31.5" text-anchor="middle" dominant-baseline="central" class="am-node-text">讓惡意程式通過系統簽章</text><text x="625.2" y="48.5" text-anchor="middle" dominant-baseline="central" class="am-node-text">驗證</text></g></g></svg></figure>
+<div class="am-md"><ul>
+<li><strong>TLS MITM</strong>：同網路內，攻擊者把「google.com」連線導向自己 server。瀏覽器看到憑證鏈完整、綠鎖頭、沒警告 — 使用者分辨不出來</li>
+<li><strong>假程式簽章</strong>：Windows / macOS 安裝程式時會驗憑證鏈。被攻破的 code signing CA 可以讓惡意程式偽裝成任何公司的合法程式</li>
+</ul>
+<p>截至 2026-10-21，<strong>尚無證據</strong>有人實際利用這些 key 做過攻擊。但「可以做」跟「做過了」是兩件事，風險期間所有流量/下載都要當不可信看待。</p>
 </div></div>
 </section>
 <section class="am-panel" id="panel-F">
-<header class="am-panel-head"><span class="am-panel-id">F</span><h2>步驟 3：Domino Directory（names.nsf）</h2></header>
-<div class="am-panel-body"><div class="am-md"><p>在 <strong>Domino 管理伺服器</strong>上做一次即可。</p>
+<header class="am-panel-head"><span class="am-panel-id">F</span><h2>為什麼 Notes/Domino 首當其衝</h2></header>
+<div class="am-panel-body"><div class="am-md"><p>作業系統更新 CA store 保護<strong>不到</strong>應用程式自帶的 CA store。Notes/Domino 一台伺服器上有 <strong>4 個獨立的</strong> CA 信任庫：</p>
 </div>
-<figure class="am-diagram am-flow"><svg viewBox="0 0 1077 97" width="1077" height="97" role="img" aria-label="Flowchart: 開 names.nsf, Security → Certificates view, 選 &quot;CN=AAA Certificate Services/O=Comodo CA Limited/...&quot;, 刪除?, 複製 NAB 到全部伺服器, 一次重啟一台" xmlns="http://www.w3.org/2000/svg"><defs><marker id="am1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="am-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs><g></g><g><g data-step="0"><path class="am-edge" d="M134.1,48.5 L145.6,48.5 Q157.1,48.5 168.6,48.5 L180.1,48.5" marker-end="url(#am1-arrow)"/></g><g data-step="0"><path class="am-edge" d="M343.8,48.5 L355.3,48.5 Q366.8,48.5 378.3,48.5 L389.8,48.5" marker-end="url(#am1-arrow)"/></g><g data-step="0"><path class="am-edge" d="M560.3,48.5 L571.8,48.5 Q583.3,48.5 594.8,48.5 L606.3,48.5" marker-end="url(#am1-arrow)"/></g><g data-step="1"><path class="am-edge" d="M698.2,48.5 L709.7,48.5 Q721.2,48.5 732.7,48.5 L744.2,48.5" marker-end="url(#am1-arrow)"/></g><g data-step="1"><path class="am-edge" d="M910.5,48.5 L922,48.5 Q933.5,48.5 945,48.5 L956.5,48.5" marker-end="url(#am1-arrow)"/></g></g><g><g class="am-node am-node--round" data-key="開 names.nsf" data-step="0"><rect class="am-node-shape" x="14" y="31" width="120.1" height="35" rx="17.5"/><text x="74" y="48.5" text-anchor="middle" dominant-baseline="central" class="am-node-text">開 names.nsf</text></g><g class="am-node am-node--rect" data-key="Security → Certificates view" data-step="0"><rect class="am-node-shape" x="180.1" y="22.5" width="163.7" height="52" rx="3"/><text x="261.9" y="40" text-anchor="middle" dominant-baseline="central" class="am-node-text">Security → Certificates</text><text x="261.9" y="57" text-anchor="middle" dominant-baseline="central" class="am-node-text">view</text></g><g class="am-node am-node--rect" data-key="選 &quot;CN=AAA Certificate Services/O=Comodo CA Limited/...&quot;" data-step="0"><rect class="am-node-shape" x="389.8" y="14" width="170.5" height="69" rx="3"/><text x="475" y="31.5" text-anchor="middle" dominant-baseline="central" class="am-node-text">選 &quot;CN=AAA Certificate</text><text x="475" y="48.5" text-anchor="middle" dominant-baseline="central" class="am-node-text">Services/O=Comodo</text><text x="475" y="65.5" text-anchor="middle" dominant-baseline="central" class="am-node-text">CA Limited/...&quot;</text></g><g class="am-node am-node--diamond" data-key="刪除?" data-step="0"><polygon class="am-node-shape" points="652.2,20.5 698.2,48.5 652.2,76.5 606.3,48.5"/><text x="652.2" y="48.5" text-anchor="middle" dominant-baseline="central" class="am-node-text">刪除?</text></g><g class="am-node am-node--rect" data-key="複製 NAB 到全部伺服器" data-step="1"><rect class="am-node-shape" x="744.2" y="31" width="166.3" height="35" rx="3"/><text x="827.4" y="48.5" text-anchor="middle" dominant-baseline="central" class="am-node-text">複製 NAB 到全部伺服器</text></g><g class="am-node am-node--rect" data-key="一次重啟一台" data-step="1"><rect class="am-node-shape" x="956.5" y="31" width="106" height="35" rx="3"/><text x="1009.5" y="48.5" text-anchor="middle" dominant-baseline="central" class="am-node-text">一次重啟一台</text></g></g></svg></figure>
-<div class="am-md"><p>若 Internet certifiers 有被推到 Notes Client 的 names.nsf，Client 端也要去 <strong>Advanced → Certificates view</strong> 一併刪。</p>
+<div class="am-tree"><div class="am-tree-root am-tree-root--solo"><div class="am-tree-box am-tree-box--root" data-key="Notes/Domino 的 4 個 CA 信任庫" data-step="0">Notes/Domino 的 4 個 CA 信任庫</div></div><ul class="am-tree-list"><li data-key="Java keystore (`cacerts`)" data-step="1"><span class="am-tree-label">Java keystore (<code>cacerts</code>)</span><span class="am-tree-sub">jvm/lib/security/ 底下，被內嵌的 Java 元件用</span></li><li data-key="cacert.pem" data-step="2"><span class="am-tree-label">cacert.pem</span><span class="am-tree-sub">Data directory，libcurl 讀，LotusScript / OIDC / DominoIQ HTTPS 呼叫用</span></li><li data-key="Domino Directory (`names.nsf`)" data-step="3"><span class="am-tree-label">Domino Directory (<code>names.nsf</code>)</span><span class="am-tree-sub">Security → Certificates 一整個 view，Notes 的 Internet certifiers</span></li><li data-key="Notes Client `cert8.db`" data-step="4"><span class="am-tree-label">Notes Client <code>cert8.db</code></span><span class="am-tree-sub">使用者端 BrowserProfile 底下</span></li></ul></div>
+<div class="am-md"><p><strong>OS 更新全都動不到這 4 個地方</strong> — 每個應用都要發自己的 patch 或由管理員手動刪憑證。</p>
 </div></div>
 </section>
 <section class="am-panel" id="panel-G">
-<header class="am-panel-head"><span class="am-panel-id">G</span><h2>步驟 4：Notes Client cert8.db</h2></header>
-<div class="am-panel-body"><div class="am-md"><blockquote>
-<p>⚠️ <strong>USFG 客戶</strong>（United States Federal Government）請直接聯絡 HCL Federal Support Center，不要自己動。</p>
-</blockquote>
-<ol>
-<li>從 KB 文章下載 HCL 提供的新版 cert8.db</li>
-<li>關閉 Notes Client（Client 必須先跑過<strong>至少一次</strong>才能進下一步）</li>
-<li>到下面路徑，<strong>先把舊 <code>cert8.db</code> 備份</strong>、再用下載版覆蓋：</li>
-</ol>
-<div class="am-table-wrap"><table>
-<thead>
-<tr>
-<th>平台</th>
-<th>路徑</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Mac</td>
-<td><code>~/Library/Application Support/HCL Notes Data/Expeditor/BrowserProfile</code></td>
-</tr>
-<tr>
-<td>Windows 單一使用者（標準）</td>
-<td><code>C:\Program Files\HCL\Notes\Data\workspace\BrowserProfile\</code></td>
-</tr>
-<tr>
-<td>Windows 單一使用者（自訂）</td>
-<td><code>&lt;Notes Folder&gt;\&lt;Data Folder&gt;\workspace\BrowserProfile\</code></td>
-</tr>
-<tr>
-<td>Windows 多使用者</td>
-<td><code>C:\Users\&lt;user&gt;\AppData\Local\HCL\Notes\Data\workspace\BrowserProfile\</code></td>
-</tr>
-</tbody></table></div>
+<header class="am-panel-head"><span class="am-panel-id">G</span><h2>為什麼不能「等 HCL 發修正包」</h2></header>
+<div class="am-panel-body"><div class="am-md"><p>可以等，但現在不修每一天都是風險窗口。HCL 給 KB0134844 的建議：</p>
+</div>
+<div class="am-callout am-callout--warn" role="note"><div class="am-callout-title">修補時間窗</div><div class="am-callout-body am-md"><p>HCL 的正式 Fixpack（12.0.2 FP9、14.0 FP6、14.5.1 FP2 之類）<strong>尚未釋出</strong>。KB0134844 指示的手動步驟是過渡措施，等正式 patch 出來之前就要先做。</p>
+</div></div>
+<div class="am-md"><p><strong>手動刪的好處</strong>：立即生效、不用停機安裝、可反悔（有備份）。<strong>壞處</strong>：要跑每台伺服器，4 個位置都要處理，且新裝的伺服器又要再做一次直到官方 patch 釋出。</p>
 </div></div>
 </section>
 <section class="am-panel" id="panel-H">
-<header class="am-panel-head"><span class="am-panel-id">H</span><h2>完成後：擴散與驗證</h2></header>
-<div class="am-panel-body"><div class="am-md"><ul>
-<li>若有把<strong>其他被入侵的 CA Internet certifiers</strong> 手動加到這幾個庫或 <code>certstore.nsf</code> — HCL 建議一併移除或換成其他可信 CA</li>
-<li>伺服器重啟後，確認 LotusScript / OIDC / DominoIQ 走 HTTPS 的功能還能通</li>
-<li>持續關注 KB0134844 — HCL 計劃發佈進一步更新，建議訂閱該 KB</li>
+<header class="am-panel-head"><span class="am-panel-id">H</span><h2>總結：修補路徑看另一頁</h2></header>
+<div class="am-panel-body"><div class="am-md"><p>修的具體步驟（4 個位置 × 平台 × 版本）寫在另一份 KB0134844 頁面：</p>
+<ul>
+<li>修補步驟頁：<a href="how-to.html">該怎麼做：KB0134844 修補步驟</a></li>
+<li>官方 KB：<a href="https://support.hcl-software.com/csm?id=kb_article&amp;sys_kb_id=493d196a3b14d31428f8f547f4e45a7c">HCL KB0134844</a></li>
 </ul>
 </div></div>
 </section>
 <section class="am-panel" id="panel-I">
-<header class="am-panel-head"><span class="am-panel-id">I</span><h2>相關 KB（KB0134844 參照）</h2></header>
+<header class="am-panel-head"><span class="am-panel-id">I</span><h2>參考來源</h2></header>
 <div class="am-panel-body"><div class="am-md"><ul>
-<li><a href="https://support.hcl-software.com/csm?id=kb_article&amp;sysparm_article=KB0134742">KB0134742</a></li>
-<li><a href="https://support.hcl-software.com/csm?id=kb_article&amp;sysparm_article=KB0134847">KB0134847</a></li>
-<li><a href="https://support.hcl-software.com/csm?id=kb_article&amp;sysparm_article=KB0134848">KB0134848</a></li>
-<li><a href="https://support.hcl-software.com/csm?id=kb_article&amp;sysparm_article=KB0134849">KB0134849</a></li>
+<li><a href="https://www.keytos.io/blog/pki/emudhra-ca-key-compromise/">Keytos — eMudhra CA Key Compromise Explained</a></li>
+<li><a href="https://thehackernews.com/2026/10/eight-emudhra-ca-keys-compromised.html">The Hacker News — Eight eMudhra CA Keys Compromised</a></li>
+<li><a href="https://access.redhat.com/security/vulnerabilities/RHSB-2026-012">Red Hat — RHSB-2026-012</a></li>
+<li><a href="https://blog.google/security/protecting-chrome-and-android-users-from-compromised-emudhra-intermediate-ca-certificates/">Google Security Blog — Chrome / Android 保護措施</a></li>
+<li><a href="https://www.endorlabs.com/learn/emudhra-intermediate-ca-compromise-the-trust-stores-you-patched-and-the-ones-you-didnt-know-you-had">Endor Labs — The Trust Stores You Didn&#39;t Patch</a></li>
+<li><a href="https://tech-insider.org/emudhra-ca-private-keys-compromised-number-4-2026/">tech-insider — One Was the Number 4</a></li>
 </ul>
 </div></div>
 </section>
 </div>
 </div>
 </main>
-<div class="am-lightbox" hidden aria-modal="true" role="dialog" aria-label="Diagram viewer" data-expand="Expand diagram">
+<div class="am-lightbox" hidden aria-modal="true" role="dialog" aria-label="圖表檢視" data-expand="展開查看圖表">
 <div class="am-lightbox-backdrop"></div>
 <div class="am-lightbox-header">
 <div class="am-lightbox-title">
@@ -1096,7 +1028,7 @@ Domino on IBM iSeries 不用動 cacert.pem（走 <code>cacert.kdb</code>）。</
 <span class="am-lightbox-title-text"></span>
 </div>
 <div class="am-lightbox-actions">
-<button class="am-lightbox-close" data-action="close" title="Close" aria-label="Close">✕</button>
+<button class="am-lightbox-close" data-action="close" title="關閉" aria-label="關閉">✕</button>
 </div>
 </div>
 <div class="am-lightbox-stage">
@@ -1107,114 +1039,98 @@ Domino on IBM iSeries 不用動 cacert.pem（走 <code>cacert.kdb</code>）。</
 template: doc
 outline: left
 theme: auto
-title: HCL Notes/Domino — eMudhra 憑證入侵風險修補
-subtitle: KB0134844 · 把 4 個憑證庫裡的被信任憑證移除
-file: hcl-emudhra-cert-fix
-source: HCL KB0134844
-updated: 2026-11-04（KB 更新於 3 天前）
+title: eMudhra 憑證入侵事件 — 這個弱點是怎麼產生的
+subtitle: 2026 年 10 月 · 8 把 intermediate CA 私鑰弱到可被還原
+file: hcl-emudhra-root-cause
+source: Keytos / Mozilla NSS / The Hacker News / Red Hat RHSB-2026-012
 ---
-Lead：eMudhra 中介 CA 被入侵，影響 Notes/Domino 內建的 Java 與 libcurl 根憑證庫。官方修補尚未釋出，先照下面 4 步驟手動從 4 個憑證庫刪除 **emSign** 與 **Comodo AAA** 憑證，就能擋掉風險。整個流程**不需要裝修正包**，只是改既有檔案。
+Lead：**一把 intermediate CA 的私鑰就是數字 4**。不是 eMudhra 被駭。是 2025 年 4 月他們產出的 8 把 intermediate CA 金鑰強度太弱。公鑰公開在 CCADB，任何人抓到都能反推私鑰。拿到私鑰就能偽造任何 HTTPS 憑證。Notes/Domino 中招是因為它**自帶** CA 信任庫、不吃 OS 更新。
 
-## A 影響範圍 {span=3}
-| 產品 | 受影響版本 | 不受影響 |
-|---|---|---|
-| HCL Notes/Domino | 12.0.2 Fixpack 8 及更早、14.0 Fixpack 5 及更早、14.5.1 Fixpack 1 及更早 | 之後的 Fixpack |
-| Domino on IBM iSeries | 僅 Java keystore 需要處理（請聯絡 IBM） | libcurl 用獨立 `cacert.kdb`，無此憑證 |
-| Notes on Mac（libcurl 部分） | — | 用系統 keychain，升級 macOS 即可 |
-
-## B 要修哪 4 個位置 {span=3}
-```tree list
-Notes/Domino 伺服器與 Client
-  1. Java keystore (`cacerts`) | jvm/lib/security/，所有平台都要
-  2. cacert.pem | 位於 Data directory，libcurl 的信任根
-  3. Domino Directory (`names.nsf`) | 管理伺服器上，Security → Certificates
-  4. Notes Client `cert8.db` | 僅 Notes Client（Windows 與 Mac 各有路徑）
+## A 一句話重述 {span=3}
+```callout err 「信任清單」裡八把金鑰破功
+Certificate Authority（CA）是網路世界的印章商。eMudhra 2025 年 4 月做的八把印章刻得太粗糙，任何人都能仿製。印章刻好之後，被 Mozilla、Microsoft、Apple 等主流信任清單收錄 — 包含 Notes/Domino 自帶的信任清單。結果：有能力的攻擊者可以偽造任何 HTTPS 網站的身分。
 ```
 
-## C 要刪的憑證清單 {span=3}
-| # | 憑證名稱 | 出現在哪些位置 |
-|---|---|---|
-| 1 | emSign ECC Root CA — G3 | Java keystore、cacert.pem |
-| 2 | emSign Root CA — C1 | cacert.pem |
-| 3 | emSign ECC Root CA — C3 | cacert.pem |
-| 4 | Comodo AAA Services root (CN=AAA Certificate Services) | names.nsf、cacert.pem（僅舊版 Notes/Domino）、cert8.db |
-
-## D 步驟 1：Java keystore（所有版本都要跑）
-關閉 Notes/Domino 再執行指令。路徑從 `&lt;Notes/Domino Program directory&gt;/jvm/lib/security/` 開始。
-
-**Notes/Domino 12.0.2 Fixpacks（Java 8）**
-
-```bash title=&quot;Windows (12.0.2)&quot;
-cd &lt;Program directory&gt;\jvm\lib\security
-..\..\bin\keytool.exe -delete -alias &quot;cn=emsign_ecc_root_ca_-_g3,o=emudhra_technologies_limited,ou=emsign_pki,c=in&quot; -keystore cacerts -storepass changeit
-```
-
-```bash title=&quot;Linux/AIX/Mac (12.0.2)&quot;
-cd &lt;Program directory&gt;/jvm/lib/security
-../../bin/keytool -delete -alias &quot;cn=emsign_ecc_root_ca_-_g3,o=emudhra_technologies_limited,ou=emsign_pki,c=in&quot; -keystore cacerts -storepass changeit
-```
-
-較舊的 12.0.2 版本若上面格式錯，改用這個 alias：`&quot;c = in, ou = emsign pki, o = emudhra technologies limited, cn = emsign ecc root ca - g3&quot;`
-
-**Notes/Domino 14.0 / 14.5.1 Fixpacks（Java 17 / Java 21）**
-
-```bash title=&quot;Windows (14.x)&quot;
-cd &lt;Program directory&gt;\jvm\lib\security
-..\..\bin\keytool.exe -delete -alias &quot;cn_emsign_ecc_root_ca__g3,o_emudhra_technologies_limited,ou_emsign_pki,c_in [jdk]&quot; -cacerts
-```
-
-```bash title=&quot;Linux/AIX/Mac (14.x)&quot;
-cd &lt;Program directory&gt;/jvm/lib/security
-../../bin/keytool -delete -alias &quot;cn_emsign_ecc_root_ca__g3,o_emudhra_technologies_limited,ou_emsign_pki,c_in [jdk]&quot; -cacerts
-```
-
-&gt; IBM iSeries 用 IBM JVM，不是 Semeru。請找 IBM support 處理 JVM。
-
-## E 步驟 2：cacert.pem（libcurl 用）
-libcurl 被 LotusScript、OIDC、DominoIQ 等功能用。cacert.pem 在 Data directory。
-
-1. 用編輯器打開 `&lt;Data directory&gt;/cacert.pem`
-2. 刪掉以下三段（emSign ECC G3、emSign C1、emSign ECC C3）的完整 `-----BEGIN CERTIFICATE-----` 到 `-----END CERTIFICATE-----` 段落
-3. 若是舊版 Notes/Domino，再刪掉 Comodo AAA Services root 那段
-4. 存檔後重啟 Notes/Domino
-
-&gt; Notes on Mac 不用動 cacert.pem（走系統 keychain），升級 macOS 即可。
-&gt; Domino on IBM iSeries 不用動 cacert.pem（走 `cacert.kdb`）。
-
-## F 步驟 3：Domino Directory（names.nsf）
-在 **Domino 管理伺服器**上做一次即可。
+## B CA 信任鏈怎麼運作
+正常狀況下，瀏覽器或應用程式信任 Root CA，Root CA 簽發 Intermediate CA，Intermediate CA 簽發你網站的憑證。只要攻擊者拿到任何一層的私鑰，就能偽造這條鏈下面所有東西。
 
 ```flow LR
-(開 names.nsf) -&gt; [Security → Certificates view] -&gt; [選 &quot;CN=AAA Certificate Services/O=Comodo CA Limited/...&quot;] -&gt; {刪除?}
-{刪除?} -&gt; [複製 NAB 到全部伺服器] -&gt; [一次重啟一台]
+(Root CA) -&gt; [Intermediate CA] -&gt; [你的網站 example.com]
+[Intermediate CA] -&gt; [別人的網站 google.com]
+[Intermediate CA] -&gt; [銀行網站 bank.com]
 ```
 
-若 Internet certifiers 有被推到 Notes Client 的 names.nsf，Client 端也要去 **Advanced → Certificates view** 一併刪。
+Intermediate CA 是重點目標 — 一把就能簽**全世界任何網域**的假憑證。
 
-## G 步驟 4：Notes Client cert8.db
-&gt; ⚠️ **USFG 客戶**（United States Federal Government）請直接聯絡 HCL Federal Support Center，不要自己動。
+## C 時間軸（實際發生順序）
+```timeline v
+2025-04 | 瑕疵金鑰儀式 | eMudhra 做了一次 key ceremony，產出 8 把 intermediate CA 金鑰。eMudhra 事後自己說這次儀式有瑕疵（未經第三方獨立證實）
+2026-10-17 | *研究者發現 | 一位獨立研究者掃公開 CCADB（Common CA Database）語料庫，發現這 8 把金鑰的 public key 可以枚舉推回 private key
+2026-10-18 | eMudhra 緊急撤銷 | 把 8 把 intermediate CA 全部標記為 key compromise 撤銷
+2026-10-20 | Mozilla 移除 | NSS（Firefox / 多數 Linux 用）移除 emSign ECC Root CA - G3
+2026-10-22 | eMudhra 退場 | eMudhra 董事會宣布自願退出全球 SSL/TLS 憑證業務（此條僅單一來源 tech-insider.org 報導）
+進行中 | Vendor patching | Red Hat 更新 ca-certificates、Google 宣布 Chrome 153 起不再預設信任、HCL 等應用廠商發 KB 指示手動刪除
+```
 
-1. 從 KB 文章下載 HCL 提供的新版 cert8.db
-2. 關閉 Notes Client（Client 必須先跑過**至少一次**才能進下一步）
-3. 到下面路徑，**先把舊 `cert8.db` 備份**、再用下載版覆蓋：
+## D 「可枚舉的弱 key」是什麼意思
+RSA 金鑰的強度建立在「兩個大質數相乘容易、但反推極難」上。正常 RSA key 的私鑰是個 2048 或 4096 bit 的巨大整數。
 
-| 平台 | 路徑 |
+| 正常 CA 私鑰 | eMudhra 這批弱 key |
 |---|---|
-| Mac | `~/Library/Application Support/HCL Notes Data/Expeditor/BrowserProfile` |
-| Windows 單一使用者（標準） | `C:\Program Files\HCL\Notes\Data\workspace\BrowserProfile\` |
-| Windows 單一使用者（自訂） | `&lt;Notes Folder&gt;\&lt;Data Folder&gt;\workspace\BrowserProfile\` |
-| Windows 多使用者 | `C:\Users\&lt;user&gt;\AppData\Local\HCL\Notes\Data\workspace\BrowserProfile\` |
+| 2048 / 4096 bit 隨機大整數 | 其中一把報導說就是「數字 4」 |
+| 用密碼學隨機源 | 疑似沒跑真正的亂數產生流程 |
+| 數學上現在猜不出 | 公鑰反推私鑰只要幾秒 |
 
-## H 完成後：擴散與驗證
-- 若有把**其他被入侵的 CA Internet certifiers** 手動加到這幾個庫或 `certstore.nsf` — HCL 建議一併移除或換成其他可信 CA
-- 伺服器重啟後，確認 LotusScript / OIDC / DominoIQ 走 HTTPS 的功能還能通
-- 持續關注 KB0134844 — HCL 計劃發佈進一步更新，建議訂閱該 KB
+&gt; ⚠️ 來源：The Hacker News / tech-insider / Keytos 皆有報導「其中一把金鑰為數字 4」。eMudhra 官方聲明把責任歸給「key ceremony 流程瑕疵」。
 
-## I 相關 KB（KB0134844 參照）
-- [KB0134742](https://support.hcl-software.com/csm?id=kb_article&amp;sysparm_article=KB0134742)
-- [KB0134847](https://support.hcl-software.com/csm?id=kb_article&amp;sysparm_article=KB0134847)
-- [KB0134848](https://support.hcl-software.com/csm?id=kb_article&amp;sysparm_article=KB0134848)
-- [KB0134849](https://support.hcl-software.com/csm?id=kb_article&amp;sysparm_article=KB0134849)</textarea>
+## E 拿到私鑰的攻擊者能幹嘛
+```flow LR
+(攻擊者有私鑰) -&gt; {簽什麼?}
+{簽什麼?} -&gt; [TLS 憑證 x 6 把] -&gt; [偽造 HTTPS 身分 → MITM]
+{簽什麼?} -&gt; [程式碼簽章憑證 x 2 把] -&gt; [讓惡意程式通過系統簽章驗證]
+```
+
+- **TLS MITM**：同網路內，攻擊者把「google.com」連線導向自己 server。瀏覽器看到憑證鏈完整、綠鎖頭、沒警告 — 使用者分辨不出來
+- **假程式簽章**：Windows / macOS 安裝程式時會驗憑證鏈。被攻破的 code signing CA 可以讓惡意程式偽裝成任何公司的合法程式
+
+截至 2026-10-21，**尚無證據**有人實際利用這些 key 做過攻擊。但「可以做」跟「做過了」是兩件事，風險期間所有流量/下載都要當不可信看待。
+
+## F 為什麼 Notes/Domino 首當其衝
+作業系統更新 CA store 保護**不到**應用程式自帶的 CA store。Notes/Domino 一台伺服器上有 **4 個獨立的** CA 信任庫：
+
+```tree list
+Notes/Domino 的 4 個 CA 信任庫
+  Java keystore (`cacerts`) | jvm/lib/security/ 底下，被內嵌的 Java 元件用
+  cacert.pem | Data directory，libcurl 讀，LotusScript / OIDC / DominoIQ HTTPS 呼叫用
+  Domino Directory (`names.nsf`) | Security → Certificates 一整個 view，Notes 的 Internet certifiers
+  Notes Client `cert8.db` | 使用者端 BrowserProfile 底下
+```
+
+**OS 更新全都動不到這 4 個地方** — 每個應用都要發自己的 patch 或由管理員手動刪憑證。
+
+## G 為什麼不能「等 HCL 發修正包」
+可以等，但現在不修每一天都是風險窗口。HCL 給 KB0134844 的建議：
+
+```callout warn 修補時間窗
+HCL 的正式 Fixpack（12.0.2 FP9、14.0 FP6、14.5.1 FP2 之類）**尚未釋出**。KB0134844 指示的手動步驟是過渡措施，等正式 patch 出來之前就要先做。
+```
+
+**手動刪的好處**：立即生效、不用停機安裝、可反悔（有備份）。**壞處**：要跑每台伺服器，4 個位置都要處理，且新裝的伺服器又要再做一次直到官方 patch 釋出。
+
+## H 總結：修補路徑看另一頁
+修的具體步驟（4 個位置 × 平台 × 版本）寫在另一份 KB0134844 頁面：
+
+- 修補步驟頁：[該怎麼做：KB0134844 修補步驟](how-to.html)
+- 官方 KB：[HCL KB0134844](https://support.hcl-software.com/csm?id=kb_article&amp;sys_kb_id=493d196a3b14d31428f8f547f4e45a7c)
+
+## I 參考來源
+- [Keytos — eMudhra CA Key Compromise Explained](https://www.keytos.io/blog/pki/emudhra-ca-key-compromise/)
+- [The Hacker News — Eight eMudhra CA Keys Compromised](https://thehackernews.com/2026/10/eight-emudhra-ca-keys-compromised.html)
+- [Red Hat — RHSB-2026-012](https://access.redhat.com/security/vulnerabilities/RHSB-2026-012)
+- [Google Security Blog — Chrome / Android 保護措施](https://blog.google/security/protecting-chrome-and-android-users-from-compromised-emudhra-intermediate-ca-certificates/)
+- [Endor Labs — The Trust Stores You Didn&#39;t Patch](https://www.endorlabs.com/learn/emudhra-intermediate-ca-compromise-the-trust-stores-you-patched-and-the-ones-you-didnt-know-you-had)
+- [tech-insider — One Was the Number 4](https://tech-insider.org/emudhra-ca-private-keys-compromised-number-4-2026/)
+</textarea>
 <script>
 (() => {
 // How a formula reads in a quote. MathML has no plain text, so src/math.js writes the formula as the draft wrote it, delimiters included, in
