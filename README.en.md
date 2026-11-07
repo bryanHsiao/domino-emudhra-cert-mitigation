@@ -2,7 +2,7 @@
 
 [繁體中文](README.md) · **English**
 
-> 📖 **Online visual guide** (GitHub Pages): <https://bryanhsiao.github.io/domino-emudhra-cert-mitigation/>
+> 📖 **Online visual guide** (GitHub Pages, two pages): ① [Root cause](https://bryanhsiao.github.io/domino-emudhra-cert-mitigation/) → ② [How to fix](https://bryanhsiao.github.io/domino-emudhra-cert-mitigation/how-to.html)
 
 Guidance for **auditing and removing** the compromised eMudhra / emSign CA certificates (CVE-2026-91403, CVSS 9.1) from HCL Domino / Notes environments.
 

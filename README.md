@@ -2,7 +2,7 @@
 
 **繁體中文** · [English](README.en.md)
 
-> 📖 **線上視覺導讀**（GitHub Pages）：<https://bryanhsiao.github.io/domino-emudhra-cert-mitigation/>
+> 📖 **線上視覺導讀**（GitHub Pages，兩頁）：① [事件原因](https://bryanhsiao.github.io/domino-emudhra-cert-mitigation/) → ② [該怎麼做：修補步驟](https://bryanhsiao.github.io/domino-emudhra-cert-mitigation/how-to.html)
 
 針對 **eMudhra / emSign CA 中繼私鑰外洩**（CVE-2026-91403，CVSS 9.1）在 HCL Domino / Notes 環境中的**清查與移除**做法。
 
